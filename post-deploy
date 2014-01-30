@@ -1,0 +1,35 @@
+#!/bin/bash
+APP="$1"; IMAGE="app/$APP"; DOKKU_ROOT="/home/dokku"
+# Check for wp-config.php
+
+id=$(docker run -d $IMAGE test -f app/wp-config.php)
+if [ $(docker wait $id) -ne 0 ]; then
+ echo "no config"
+  exit 0
+fi
+echo "app name is $APP"
+if [ -f "$DOKKU_ROOT/.mysql/volume_$APP" ]; then
+    dokku mysql:link $APP $APP
+else
+    echo "--------> starting mysql creating"
+    dokku mysql:create $APP
+fi
+
+id=$(docker run -d $IMAGE test -f app/$APP.sql)
+if [ $(docker wait $id) -ne 0 ]; then
+ echo "no sql dump"
+  exit 0
+fi
+
+    ID=$(docker ps  | grep "$IMAGE":latest |  awk '{print $1}')
+    if [[ ! -z $ID ]]; then
+        docker cp $ID:/app/$APP.sql /tmp
+    fi
+
+#dokku run $APP cat /app/$APP.sql > /tmp/$APP.temp.sql
+#sleep 1
+echo "Loading new dump"
+dokku mysql:load_dump $APP /tmp/$APP.sql
+echo "New dump loaded"
+
+echo "ended"
