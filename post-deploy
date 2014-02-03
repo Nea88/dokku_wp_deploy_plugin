@@ -7,29 +7,66 @@ if [ $(docker wait $id) -ne 0 ]; then
  echo "no config"
   exit 0
 fi
+
 echo "app name is $APP"
-if [ -f "$DOKKU_ROOT/.mysql/volume_$APP" ]; then
-    dokku mysql:link $APP $APP
-else
-    echo "--------> starting mysql creating"
-    dokku mysql:create $APP
+
+
+
+ID=$(docker ps  | grep "$IMAGE":latest |  awk '{print $1}')
+if [[ ! -z $ID ]]; then
+     docker cp $ID:/app/PROJECT_NAME $DOKKU_ROOT/$APP
+     APP_REAL=$(cat "$DOKKU_ROOT/$APP/PROJECT_NAME")
+     if [ ! -f "$DOKKU_ROOT/$APP/PROJECT_NAME" ]; then
+         APP_REAL=$APP
+     fi
+     docker cp $ID:/app/$APP_REAL.sql /tmp
+     docker cp $ID:/app/DOMAINS $DOKKU_ROOT/$APP/
+     docker cp $ID:/app/PERSISTENT_STORAGE $DOKKU_ROOT/$APP
+     if [ ! -f "$DOKKU_ROOT/$APP/PERSISTENT_STORAGE" ]; then
+         echo "/home/dokku/.storages/$APP_REAL:/app/content/uploads" > "$DOKKU_ROOT/$APP/PERSISTENT_STORAGE"
+     fi
 fi
 
-id=$(docker run -d $IMAGE test -f app/$APP.sql)
+
+echo "Real app name is $APP_REAL"
+
+if [ -f "$DOKKU_ROOT/.mysql/volume_$APP_REAL" ]; then
+    dokku mysql:link $APP $APP_REAL
+else
+    echo "--------> starting mysql creating"
+    dokku mysql:create $APP_REAL
+    dokku mysql:link $APP $APP_REAL
+fi
+
+if [ ! -d  "$DOKKU_ROOT/.storages/" ]; then
+   mkdir "$DOKKU_ROOT/.storages"
+fi
+
+if [ ! -d "$DOKKU_ROOT/.storages/$APP_REAL" ]; then
+   mkdir "$DOKKU_ROOT/.storages/$APP_REAL"
+fi
+
+
+
+
+id=$(docker run -d $IMAGE test -f app/$APP_REAL.sql)
 if [ $(docker wait $id) -ne 0 ]; then
  echo "no sql dump"
   exit 0
 fi
 
-    ID=$(docker ps  | grep "$IMAGE":latest |  awk '{print $1}')
-    if [[ ! -z $ID ]]; then
-        docker cp $ID:/app/$APP.sql /tmp
-    fi
+#echo "$/home/dokku/.storages/$APP_REAL:/app/shared/content/uploads" >  "$DOKKU_ROOT/$APP/PERSISTENT_STORAGE" 
+#ID=$(docker ps  | grep "$IMAGE":latest |  awk '{print $1}')
+#if [[ ! -z $ID ]]; then
+#     docker cip $ID:/app/$APP.sql /tmp
+#     docker cp $ID:/app/DOMAINS $DOKKU_ROOT/$APP/
+#     docker cp $ID:/app/PERSISTENT_STORAGE $DOKKU_ROOT/$APP
+#fi
 
 #dokku run $APP cat /app/$APP.sql > /tmp/$APP.temp.sql
 #sleep 1
 echo "Loading new dump"
-dokku mysql:load_dump $APP /tmp/$APP.sql
+dokku mysql:load_dump $APP /tmp/$APP_REAL.sql
 echo "New dump loaded"
 
 echo "ended"
