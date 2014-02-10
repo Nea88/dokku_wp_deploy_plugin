@@ -23,7 +23,7 @@ if [[ ! -z $ID ]]; then
      docker cp $ID:/app/DOMAINS $DOKKU_ROOT/$APP/
      docker cp $ID:/app/PERSISTENT_STORAGE $DOKKU_ROOT/$APP
      if [ ! -f "$DOKKU_ROOT/$APP/PERSISTENT_STORAGE" ]; then
-         echo "/home/dokku/.storages/$APP_REAL:/app/content/uploads" > "$DOKKU_ROOT/$APP/PERSISTENT_STORAGE"
+         echo "/home/dokku/.storages/$APP_REAL:/app/content/uploads:rw" > "$DOKKU_ROOT/$APP/PERSISTENT_STORAGE"
      fi
 fi
 
