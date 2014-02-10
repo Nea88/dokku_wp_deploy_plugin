@@ -66,7 +66,7 @@ fi
 #dokku run $APP cat /app/$APP.sql > /tmp/$APP.temp.sql
 #sleep 1
 echo "Loading new dump"
-dokku mysql:load_dump $APP /tmp/$APP_REAL.sql
+dokku mysql_dump:load_dump $APP /tmp/$APP_REAL.sql
 echo "New dump loaded"
 
 echo "ended"
