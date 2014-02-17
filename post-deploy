@@ -22,6 +22,15 @@ if [[ ! -z $ID ]]; then
      docker cp $ID:/app/$APP_REAL.sql /tmp
      docker cp $ID:/app/DOMAINS $DOKKU_ROOT/$APP/
      docker cp $ID:/app/PERSISTENT_STORAGE $DOKKU_ROOT/$APP
+
+     if [ ! -d  "$DOKKU_ROOT/.storages/" ]; then
+         mkdir "$DOKKU_ROOT/.storages"
+     fi
+
+     if [ ! -d "$DOKKU_ROOT/.storages/$APP_REAL" ]; then
+         mkdir "$DOKKU_ROOT/.storages/$APP_REAL"
+     fi
+
      if [ ! -f "$DOKKU_ROOT/$APP/PERSISTENT_STORAGE" ]; then
          echo "/home/dokku/.storages/$APP_REAL:/app/content/uploads:rw" > "$DOKKU_ROOT/$APP/PERSISTENT_STORAGE"
      fi
@@ -37,15 +46,6 @@ else
     dokku mysql:create $APP_REAL
     dokku mysql:link $APP $APP_REAL
 fi
-
-if [ ! -d  "$DOKKU_ROOT/.storages/" ]; then
-   mkdir "$DOKKU_ROOT/.storages"
-fi
-
-if [ ! -d "$DOKKU_ROOT/.storages/$APP_REAL" ]; then
-   mkdir "$DOKKU_ROOT/.storages/$APP_REAL"
-fi
-
 
 
 
