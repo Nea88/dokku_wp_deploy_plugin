@@ -20,7 +20,7 @@ if [[ ! -z $ID ]]; then
          APP_REAL=$APP
      fi
      docker cp $ID:/app/$APP_REAL.sql /tmp
-     docker cp $ID:/app/DOMAINS $DOKKU_ROOT/$APP/
+#     docker cp $ID:/app/DOMAINS $DOKKU_ROOT/$APP/
      docker cp $ID:/app/PERSISTENT_STORAGE $DOKKU_ROOT/$APP
 
      if [ ! -d  "$DOKKU_ROOT/.storages/" ]; then
@@ -30,6 +30,7 @@ if [[ ! -z $ID ]]; then
      if [ ! -d "$DOKKU_ROOT/.storages/$APP_REAL" ]; then
          mkdir "$DOKKU_ROOT/.storages/$APP_REAL"
      fi
+     chmod 777 "$DOKKU_ROOT/.storages/$APP_REAL"
 
      if [ ! -f "$DOKKU_ROOT/$APP/PERSISTENT_STORAGE" ]; then
          echo "/home/dokku/.storages/$APP_REAL:/app/content/uploads:rw" > "$DOKKU_ROOT/$APP/PERSISTENT_STORAGE"
