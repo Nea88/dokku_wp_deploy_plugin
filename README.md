@@ -34,5 +34,4 @@ And then just push your app
 * mysqldump
 * https://github.com/Nea88/dokku_mysql_wp_plugin.git
 * https://github.com/Nea88/dokku_mysql_dump-plugin.git
-* https://github.com/wmluke/dokku-domains-plugin.git
 * https://github.com/Nea88/dokku-domains-plugin.git
