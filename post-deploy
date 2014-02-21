@@ -1,7 +1,7 @@
 #!/bin/bash
 APP="$1"; IMAGE="app/$APP"; DOKKU_ROOT="/home/dokku"
-# Check for wp-config.php
 
+# Check for wp-config.php
 id=$(docker run -d $IMAGE test -f app/wp-config.php)
 if [ $(docker wait $id) -ne 0 ]; then
  echo "no config"
@@ -20,7 +20,6 @@ if [[ ! -z $ID ]]; then
          APP_REAL=$APP
      fi
      docker cp $ID:/app/$APP_REAL.sql /tmp
-#     docker cp $ID:/app/DOMAINS $DOKKU_ROOT/$APP/
      docker cp $ID:/app/PERSISTENT_STORAGE $DOKKU_ROOT/$APP
 
      if [ ! -d  "$DOKKU_ROOT/.storages/" ]; then
@@ -61,19 +60,11 @@ if [ $(docker wait $id) -ne 0 ]; then
   exit 0
 fi
 
-#echo "$/home/dokku/.storages/$APP_REAL:/app/shared/content/uploads" >  "$DOKKU_ROOT/$APP/PERSISTENT_STORAGE" 
-#ID=$(docker ps  | grep "$IMAGE":latest |  awk '{print $1}')
-#if [[ ! -z $ID ]]; then
-#     docker cip $ID:/app/$APP.sql /tmp
-#     docker cp $ID:/app/DOMAINS $DOKKU_ROOT/$APP/
-#     docker cp $ID:/app/PERSISTENT_STORAGE $DOKKU_ROOT/$APP
+#clear testing db before load dump
+#if [ "$APP"="$APP_REAL-testing" ]; then
+#    dokku mysql_dump:clear_db $APP
 #fi
 
-#dokku run $APP cat /app/$APP.sql > /tmp/$APP.temp.sql
-#sleep 1
-if [ "$APP"="$APP_REAL-testing" ]; then
-    dokku mysql_dump:clear_db $APP
-fi
 echo "Loading new dump"
 dokku mysql_dump:load_dump $APP /tmp/$APP_REAL.sql
 echo "New dump loaded"
