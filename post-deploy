@@ -44,8 +44,13 @@ if [ -f "$DOKKU_ROOT/.mysql/volume_$APP_REAL" ]; then
     dokku mysql:link $APP $APP_REAL
 else
     echo "--------> starting mysql creating"
-    dokku mysql:create $APP_REAL
-    dokku mysql:link $APP $APP_REAL
+    if [ "$APP"="$APP_REAL-testing"]; then
+        dokku mysql:create $APP
+        dokku mysql:link $APP $APP
+    else
+	dokku mysql:create $APP_REAL
+	dokku mysql:link $APP $APP_REAL
+    fi
 fi
 
 
@@ -66,6 +71,9 @@ fi
 
 #dokku run $APP cat /app/$APP.sql > /tmp/$APP.temp.sql
 #sleep 1
+if [ "$APP"="$APP_REAL-testing" ]; then
+    dokku mysql_dump:clear_db $APP
+fi
 echo "Loading new dump"
 dokku mysql_dump:load_dump $APP /tmp/$APP_REAL.sql
 echo "New dump loaded"
